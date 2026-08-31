@@ -82,11 +82,21 @@
             font-weight: bold;
             margin-bottom: 2px;
         }
+        .fringe-readouts {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #a0aec0;
+            line-height: 1.4;
+            background: #11141a;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #2d3345;
+        }
     </style>
 </head>
 <body>
 
-<h1>Wave Interference Lab</h1>
+<h1>Wave Interference & Diffraction Lab</h1>
 
 <div class="container">
     <div class="panel">
@@ -114,16 +124,25 @@
             <div class="slider-label"><span>Distance to Screen (D)</span><span class="num" id="txt-dist">1.20 m</span></div>
             <input type="range" id="input-dist" min="5" max="20" value="12">
         </div>
+        
+        <div class="fringe-readouts" id="fringe-info">
+            Calculating position dynamics...
+        </div>
     </div>
 
     <div class="panel">
-        <div class="title-tag">Wavefront Diffraction Graph</div>
-        <canvas id="graphCanvas" height="130"></canvas>
+        <div class="title-tag">Wave Propagation Animation</div>
+        <canvas id="waveCanvas" height="120"></canvas>
     </div>
 
     <div class="panel">
-        <div class="title-tag">Laser Screen View</div>
-        <canvas id="screenCanvas" height="70"></canvas>
+        <div class="title-tag">Intensity Profile Graph (with Max/Min Positions)</div>
+        <canvas id="graphCanvas" height="140"></canvas>
+    </div>
+
+    <div class="panel">
+        <div class="title-tag">Laser Screen Projection View</div>
+        <canvas id="screenCanvas" height="60"></canvas>
     </div>
 </div>
 
@@ -141,15 +160,18 @@
         wave: document.getElementById('txt-wave'),
         width: document.getElementById('txt-width'),
         sep: document.getElementById('txt-sep'),
-        dist: document.getElementById('txt-dist')
+        dist: document.getElementById('txt-dist'),
+        info: document.getElementById('fringe-info')
     };
 
+    const cWave = document.getElementById('waveCanvas');
     const cGraph = document.getElementById('graphCanvas');
     const cScreen = document.getElementById('screenCanvas');
+    
+    const ctxWave = cWave.getContext('2d');
     const ctxGraph = cGraph.getContext('2d');
     const ctxScreen = cScreen.getContext('2d');
 
-    // Simple hexadecimal hex converter to completely avoid text configuration mismatches
     function getWaveColorHex(wl) {
         if (wl >= 400 && wl < 440) return "#7e00ff";
         if (wl >= 440 && wl < 490) return "#004cff";
@@ -174,35 +196,65 @@
         const lambda = waveValue * 1e-9;
         const slitA = widthValue * 1e-7;
         const slitD = sepValue * 1e-7;
+        const screenD = distValue * 0.1;
 
-        const wG = cGraph.width;
-        const hG = cGraph.height;
-        const wS = cScreen.width;
-        const hS = cScreen.height;
+        const wW = cWave.width, hW = cWave.height;
+        const wG = cGraph.width, hG = cGraph.height;
+        const wS = cScreen.width, hS = cScreen.height;
 
+        ctxWave.clearRect(0, 0, wW, hW);
         ctxGraph.clearRect(0, 0, wG, hG);
         ctxScreen.clearRect(0, 0, wS, hS);
 
-        // Baseline reference lines
+        const colorHex = getWaveColorHex(waveValue);
+
+        // 1. ANIMATED WAVE PROPAGATION VIEW
+        ctxWave.fillStyle = '#1e222b';
+        ctxWave.fillRect(80, 0, 4, hW); // Slit barrier wall
+
+        ctxWave.strokeStyle = colorHex;
+        ctxWave.lineWidth = 1.5;
+        let animatedPhase = (Date.now() / 150) % 20;
+
+        if (currentMode === 'double') {
+            let slit1Y = hW / 2 - 20, slit2Y = hW / 2 + 20;
+            for(let radius = animatedPhase; radius < wW - 80; radius += 15) {
+                ctxWave.globalAlpha = Math.max(0, 1 - radius / (wW - 80));
+                ctxWave.beginPath(); ctxWave.arc(84, slit1Y, radius, -Math.PI/2, Math.PI/2); ctxWave.stroke();
+                ctxWave.beginPath(); ctxWave.arc(84, slit2Y, radius, -Math.PI/2, Math.PI/2); ctxWave.stroke();
+            }
+            ctxWave.globalAlpha = 1.0;
+            ctxWave.fillStyle = '#000';
+            ctxWave.fillRect(80, slit1Y - 2, 4, 4); ctxWave.fillRect(80, slit2Y - 2, 4, 4);
+        } else {
+            let centerSlitY = hW / 2;
+            for(let radius = animatedPhase; radius < wW - 80; radius += 15) {
+                ctxWave.globalAlpha = Math.max(0, 1 - radius / (wW - 80));
+                ctxWave.beginPath(); ctxWave.arc(84, centerSlitY, radius, -Math.PI/2, Math.PI/2); ctxWave.stroke();
+            }
+            ctxWave.globalAlpha = 1.0;
+            ctxWave.fillStyle = '#000';
+            ctxWave.fillRect(80, centerSlitY - 6, 4, 12);
+        }
+
+        // 2. GRAPH & LASER SCREEN GEOMETRY PATTERN LOOP
         ctxGraph.strokeStyle = '#334155';
         ctxGraph.lineWidth = 1;
         ctxGraph.beginPath();
-        ctxGraph.moveTo(0, hG - 15); ctxGraph.lineTo(wG, hG - 15);
-        ctxGraph.moveTo(wG / 2, 0); ctxGraph.lineTo(wG / 2, hG);
+        ctxGraph.moveTo(0, hG - 20); ctxGraph.lineTo(wG, hG - 20); // Baseline x-axis
+        ctxGraph.moveTo(wG / 2, 0); ctxGraph.lineTo(wG / 2, hG);   // Central axis
         ctxGraph.stroke();
 
-        const colorHex = getWaveColorHex(waveValue);
         ctxGraph.strokeStyle = colorHex;
         ctxGraph.lineWidth = 2.5;
         ctxGraph.beginPath();
 
-        const sweepAngle = 0.07;
+        const sweepAngle = 0.08;
 
         for (let i = 0; i < wG; i++) {
             let ratio = (i - wG / 2) / (wG / 2);
             let theta = ratio * sweepAngle;
 
-            // Beta tracking variable
             let beta = (Math.PI * slitA * Math.sin(theta)) / lambda;
             let diffFactor = (beta === 0) ? 1.0 : Math.pow(Math.sin(beta) / beta, 2);
 
@@ -212,43 +264,22 @@
                 totalIntensity = diffFactor * Math.pow(Math.cos(alpha), 2);
             }
 
-            // Map graph geometry points safely
-            let graphY = (hG - 15) - (totalIntensity * (hG - 25));
+            let graphY = (hG - 20) - (totalIntensity * (hG - 35));
             if (i === 0) ctxGraph.moveTo(i, graphY); else ctxGraph.lineTo(i, graphY);
 
-            // Directly control projection sensor colors natively without global composite math expressions
             ctxScreen.globalAlpha = Math.max(0, Math.min(1, totalIntensity));
             ctxScreen.fillStyle = colorHex;
             ctxScreen.fillRect(i, 0, 1, hS);
         }
         ctxGraph.globalAlpha = 1.0;
         ctxGraph.stroke();
-    }
 
-    // Assign simplified listeners
-    Object.keys(sliders).forEach(key => {
-        sliders[key].addEventListener('input', renderLoop);
-    });
+        // 3. ADD PHYSICAL POSITION LABELS FOR MAXIMA AND MINIMA
+        ctxGraph.fillStyle = '#94a3b8';
+        ctxGraph.font = '10px Arial';
+        
+        // Central Bright Peak
+        ctxGraph.fillStyle = '#fff';
+        ctxGraph.fillText("Max (m=0)", wG / 2 - 22, hG - 5);
 
-    document.getElementById('m-double').addEventListener('click', function() {
-        currentMode = 'double';
-        this.classList.add('active');
-        document.getElementById('m-single').classList.remove('active');
-        document.getElementById('box-sep').style.display = 'block';
-        renderLoop();
-    });
-
-    document.getElementById('m-single').addEventListener('click', function() {
-        currentMode = 'single';
-        this.classList.add('active');
-        document.getElementById('m-double').classList.remove('active');
-        document.getElementById('box-sep').style.display = 'none';
-        renderLoop();
-    });
-
-    // Run setup immediately
-    renderLoop();
-</script>
-
-</body>
-</html>
+    
