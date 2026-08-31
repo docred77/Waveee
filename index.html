@@ -297,14 +297,19 @@
         screen: canvases.screen.getContext('2d')
     };
 
-    function nmToRGB(wavelength) {
+    function nmToRGB(w) {
         let r, g, b;
-        if (wavelength >= 380 && wavelength < 440) { r = -(wavelength - 440) / 60; g = 0; b = 1; }
-        else if (wavelength >= 440 && wavelength < 490) { r = 0; g = (wavelength - 440) / 50; b = 1; }
-        else if (wavelength >= 490 && wavelength < 510) { r = 0; g = 1; b = -(wavelength - 510) / 20; }
-        else if (wavelength >= 510 && wavelength < 580) { r = (wavelength - 510) / 70; g = 1; b = 0; }
-        else if (wavelength >= 580 && wavelength < 645) { r = 1; g = -(wavelength - 645) / 65; b = 0; }
-        else if (wavelength >= 645 && wavelength <= 780) { r = 1; g = 0; b = 0; }
+        if (w >= 380 && w < 440) { r = -(w - 440) / 60; g = 0; b = 1; }
+        else if (w >= 440 && w < 490) { r = 0; g = (w - 440) / 50; b = 1; }
+        else if (w >= 490 && w < 510) { r = 0; g = 1; b = -(w - 510) / 20; }
+        else if (w >= 510 && w < 580) { r = (w - 510) / 70; g = 1; b = 0; }
+        else if (w >= 580 && w < 645) { r = 1; g = -(w - 645) / 65; b = 0; }
+        else if (w >= 645 && w <= 780) { r = 1; g = 0; b = 0; }
         else { r = 0; g = 0; b = 0; }
-        let factor = 1.0;
-  
+        let f = 1.0;
+        if (w < 420) f = 0.3 + 0.7 * (w - 380) / 40;
+        else if (w > 700) f = 0.3 + 0.7 * (780 - w) / 80;
+        return [Math.round(r*f*255), Math.round(g*f*255), Math.round(b*f*255)];
+    }
+
+    
