@@ -3,312 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wave Interference & Diffraction Lab</title>
+    <title>Wave Interference Sandbox</title>
     <style>
-        :root {
-            --bg-dark: #0f1115;
-            --panel-dark: #161920;
-            --accent-blue: #3b82f6;
-            --text-main: #e2e8f0;
-            --text-muted: #94a3b8;
-            --border: #2d3139;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
+            font-family: Arial, sans-serif;
+            background: #11141a;
+            color: #e2e8f0;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-
-        h1 {
-            font-size: 1.6rem;
-            margin: 0 0 5px 0;
-            color: #fff;
-            text-align: center;
-        }
-
-        p.subtitle {
-            margin: 0 0 20px 0;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            text-align: center;
-        }
-
-        .layout {
-            display: flex;
-            flex-direction: row;
-            gap: 20px;
-            max-width: 1200px;
-            width: 100%;
-        }
-
-        @media (max-width: 900px) {
-            .layout { flex-direction: column; }
-        }
-
-        .controls-panel {
-            flex: 1;
-            background: var(--panel-dark);
-            border: 1px solid var(--border);
-            padding: 20px;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
-            height: fit-content;
-        }
-
-        .visuals-panel {
-            flex: 1.5;
+        h1 { font-size: 1.4rem; margin: 5px 0; color: #fff; text-align: center; }
+        .container {
             display: flex;
             flex-direction: column;
             gap: 15px;
+            width: 100%;
+            max-width: 700px;
         }
-
-        .toggle-group {
+        .panel {
+            background: #1b1f29;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #2d3345;
+        }
+        .mode-row {
             display: flex;
-            background: #0f1115;
-            border-radius: 8px;
-            padding: 4px;
-            border: 1px solid var(--border);
+            gap: 10px;
+            margin-bottom: 15px;
         }
-
-        .toggle-btn {
+        .btn {
             flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            padding: 8px;
-            border-radius: 6px;
+            padding: 10px;
+            background: #2a3142;
+            border: 1px solid #3f4a63;
+            color: #94a3b8;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: all 0.2s;
+            border-radius: 6px;
+            font-weight: bold;
         }
-
-        .toggle-btn.active {
-            background: var(--accent-blue);
-            color: white;
+        .btn.active {
+            background: #2563eb;
+            color: #fff;
+            border-color: #3b82f6;
         }
-
-        .slider-container {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+        .slider-box {
+            margin-bottom: 12px;
         }
-
-        .slider-header {
+        .slider-label {
             display: flex;
             justify-content: space-between;
             font-size: 0.85rem;
-            color: var(--text-muted);
+            margin-bottom: 4px;
+            color: #94a3b8;
         }
-
-        .slider-header span.val {
-            color: var(--accent-blue);
-            font-weight: bold;
-        }
-
+        .slider-label span.num { color: #3b82f6; font-weight: bold; }
         input[type="range"] {
-            -webkit-appearance: none;
             width: 100%;
             height: 6px;
-            background: #2d3139;
+            background: #2d3345;
             border-radius: 3px;
             outline: none;
         }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: var(--accent-blue);
-            cursor: pointer;
-        }
-
-        .canvas-card {
-            background: var(--panel-dark);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .canvas-card h3 {
-            margin: 0 0 8px 0;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            align-self: flex-start;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
         canvas {
             background: #000;
             border-radius: 6px;
             width: 100%;
-            max-width: 600px;
             display: block;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            background: #0f1115;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            font-size: 0.85rem;
-        }
-
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .stat-label { color: var(--text-muted); font-size: 0.75rem; }
-        .stat-value { font-weight: bold; color: #fff; }
-
-        .btn-tool {
-            background: #232731;
-            border: 1px solid var(--border);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            width: 100%;
             margin-top: 5px;
+            border: 1px solid #2d3345;
         }
-        .btn-tool:hover { background: #2d323f; }
-        .btn-tool.active { background: #15803d; border-color: #22c55e; }
+        .title-tag {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
     </style>
 </head>
 <body>
 
-<h1>Wave Interference & Diffraction Lab</h1>
-<p class="subtitle">Interactive Sandbox for Physics Classrooms</p>
+<h1>Wave Interference Lab</h1>
 
-<div class="layout">
-    <div class="controls-panel">
-        <div class="toggle-group">
-            <button class="toggle-btn active" id="btn-double">Double Slit</button>
-            <button class="toggle-btn" id="btn-single">Single Slit</button>
+<div class="container">
+    <div class="panel">
+        <div class="mode-row">
+            <button class="btn active" id="m-double">Double Slit Mode</button>
+            <button class="btn" id="m-single">Single Slit Mode</button>
         </div>
 
-        <div class="slider-container">
-            <div class="slider-header"><span>Wavelength (λ)</span><span class="val" id="lbl-wavelength">550 nm</span></div>
-            <input type="range" id="wave" min="400" max="700" value="550">
+        <div class="slider-box">
+            <div class="slider-label"><span>Wavelength (λ)</span><span class="num" id="txt-wave">550 nm</span></div>
+            <input type="range" id="input-wave" min="400" max="700" value="550">
         </div>
 
-        <div class="slider-container">
-            <div class="slider-header"><span>Slit Width (a)</span><span class="val" id="lbl-width">4.0 μm</span></div>
-            <input type="range" id="width" min="10" max="100" value="40">
+        <div class="slider-box">
+            <div class="slider-label"><span>Slit Width (a)</span><span class="num" id="txt-width">4.0 μm</span></div>
+            <input type="range" id="input-width" min="10" max="80" value="40">
         </div>
 
-        <div class="slider-container" id="container-sep">
-            <div class="slider-header"><span>Slit Separation (d)</span><span class="val" id="lbl-sep">20.0 μm</span></div>
-            <input type="range" id="sep" min="100" max="400" value="200">
+        <div class="slider-box" id="box-sep">
+            <div class="slider-label"><span>Slit Separation (d)</span><span class="num" id="txt-sep">20.0 μm</span></div>
+            <input type="range" id="input-sep" min="100" max="300" value="200">
         </div>
 
-        <div class="slider-container">
-            <div class="slider-header"><span>Distance to Screen (D)</span><span class="val" id="lbl-dist">1.2 m</span></div>
-            <input type="range" id="dist" min="5" max="25" value="12">
-        </div>
-
-        <div class="slider-container">
-            <div class="slider-header"><span>Camera Exposure</span><span class="val" id="lbl-exp">1.0x</span></div>
-            <input type="range" id="exposure" min="5" max="30" value="10">
-        </div>
-
-        <button class="btn-tool" id="btn-ruler">📐 Enable Measuring Ruler Tool</button>
-
-        <div class="stats-grid">
-            <div class="stat-item"><span class="stat-label">1st Envelope Minimum</span><span class="stat-value" id="calc-min1">0.00°</span></div>
-            <div class="stat-item"><span class="stat-label">Fringe Width (Δy)</span><span class="stat-value" id="calc-fringe">0.00 mm</span></div>
+        <div class="slider-box">
+            <div class="slider-label"><span>Distance to Screen (D)</span><span class="num" id="txt-dist">1.20 m</span></div>
+            <input type="range" id="input-dist" min="5" max="20" value="12">
         </div>
     </div>
 
-    <div class="visuals-panel">
-        <div class="canvas-card">
-            <h3>Wave Propagation & Wavefronts</h3>
-            <canvas id="canvasWave" width="600" height="150"></canvas>
-        </div>
-        <div class="canvas-card">
-            <h3>Intensity Profile Graph</h3>
-            <canvas id="canvasGraph" width="600" height="120"></canvas>
-        </div>
-        <div class="canvas-card">
-            <h3>Simulated Camera Sensor View</h3>
-            <canvas id="canvasScreen" width="600" height="60"></canvas>
-        </div>
+    <div class="panel">
+        <div class="title-tag">Wavefront Diffraction Graph</div>
+        <canvas id="graphCanvas" height="130"></canvas>
+    </div>
+
+    <div class="panel">
+        <div class="title-tag">Laser Screen View</div>
+        <canvas id="screenCanvas" height="70"></canvas>
     </div>
 </div>
 
 <script>
-    let mode = 'double';
-    let rulerActive = false;
-    let rulerStart = null;
-    let rulerEnd = null;
+    let currentMode = 'double';
 
-    const elements = {
-        wave: document.getElementById('wave'),
-        width: document.getElementById('width'),
-        sep: document.getElementById('sep'),
-        dist: document.getElementById('dist'),
-        exposure: document.getElementById('exposure'),
-        btnDouble: document.getElementById('btn-double'),
-        btnSingle: document.getElementById('btn-single'),
-        btnRuler: document.getElementById('btn-ruler'),
-        containerSep: document.getElementById('container-sep')
+    const sliders = {
+        wave: document.getElementById('input-wave'),
+        width: document.getElementById('input-width'),
+        sep: document.getElementById('input-sep'),
+        dist: document.getElementById('input-dist')
     };
 
-    const labels = {
-        wave: document.getElementById('lbl-wavelength'),
-        width: document.getElementById('lbl-width'),
-        sep: document.getElementById('lbl-sep'),
-        dist: document.getElementById('lbl-dist'),
-        exposure: document.getElementById('lbl-exp'),
-        min1: document.getElementById('calc-min1'),
-        fringe: document.getElementById('calc-fringe')
+    const texts = {
+        wave: document.getElementById('txt-wave'),
+        width: document.getElementById('txt-width'),
+        sep: document.getElementById('txt-sep'),
+        dist: document.getElementById('txt-dist')
     };
 
-    const canvases = {
-        wave: document.getElementById('canvasWave'),
-        graph: document.getElementById('canvasGraph'),
-        screen: document.getElementById('canvasScreen')
-    };
+    const cGraph = document.getElementById('graphCanvas');
+    const cScreen = document.getElementById('screenCanvas');
+    const ctxGraph = cGraph.getContext('2d');
+    const ctxScreen = cScreen.getContext('2d');
 
-    const ctxs = {
-        wave: canvases.wave.getContext('2d'),
-        graph: canvases.graph.getContext('2d'),
-        screen: canvases.screen.getContext('2d')
-    };
-
-    function nmToRGB(w) {
-        let r, g, b;
-        if (w >= 380 && w < 440) { r = -(w - 440) / 60; g = 0; b = 1; }
-        else if (w >= 440 && w < 490) { r = 0; g = (w - 440) / 50; b = 1; }
-        else if (w >= 490 && w < 510) { r = 0; g = 1; b = -(w - 510) / 20; }
-        else if (w >= 510 && w < 580) { r = (w - 510) / 70; g = 1; b = 0; }
-        else if (w >= 580 && w < 645) { r = 1; g = -(w - 645) / 65; b = 0; }
-        else if (w >= 645 && w <= 780) { r = 1; g = 0; b = 0; }
-        else { r = 0; g = 0; b = 0; }
-        let f = 1.0;
-        if (w < 420) f = 0.3 + 0.7 * (w - 380) / 40;
-        else if (w > 700) f = 0.3 + 0.7 * (780 - w) / 80;
-        return [Math.round(r*f*255), Math.round(g*f*255), Math.round(b*f*255)];
+    // Simple hexadecimal hex converter to completely avoid text configuration mismatches
+    function getWaveColorHex(wl) {
+        if (wl >= 400 && wl < 440) return "#7e00ff";
+        if (wl >= 440 && wl < 490) return "#004cff";
+        if (wl >= 490 && wl < 510) return "#00ffb2";
+        if (wl >= 510 && wl < 580) return "#00ff00";
+        if (wl >= 580 && wl < 645) return "#ffbb00";
+        if (wl >= 645 && wl <= 700) return "#ff0000";
+        return "#ffffff";
     }
 
+    function renderLoop() {
+        const waveValue = parseInt(sliders.wave.value);
+        const widthValue = parseInt(sliders.width.value);
+        const sepValue = parseInt(sliders.sep.value);
+        const distValue = parseInt(sliders.dist.value);
+
+        texts.wave.innerText = waveValue + " nm";
+        texts.width.innerText = (widthValue / 10).toFixed(1) + " μm";
+        texts.sep.innerText = (sepValue / 10).toFixed(1) + " μm";
+        texts.dist.innerText = (distValue / 10).toFixed(2) + " m";
+
+        const lambda = waveValue * 1e-9;
+        const slitA = widthValue * 1e-7;
+        const slitD = sepValue * 1e-7;
+
+        const wG = cGraph.width;
+        const hG = cGraph.height;
+        const wS = cScreen.width;
+        const hS = cScreen.height;
+
+        ctxGraph.clearRect(0, 0, wG, hG);
+        ctxScreen.clearRect(0, 0, wS, hS);
+
+        // Baseline reference lines
+        ctxGraph.strokeStyle = '#334155';
+        ctxGraph.lineWidth = 1;
+        ctxGraph.beginPath();
+        ctxGraph.moveTo(0, hG - 15); ctxGraph.lineTo(wG, hG - 15);
+        ctxGraph.moveTo(wG / 2, 0); ctxGraph.lineTo(wG / 2, hG);
+        ctxGraph.stroke();
+
+        const colorHex = getWaveColorHex(waveValue);
+        ctxGraph.strokeStyle = colorHex;
+        ctxGraph.lineWidth = 2.5;
+        ctxGraph.beginPath();
+
+        const sweepAngle = 0.07;
+
+        for (let i = 0; i < wG; i++) {
+            let ratio = (i - wG / 2) / (wG / 2);
+            let theta = ratio * sweepAngle;
+
+            // Beta tracking variable
+            let beta = (Math.PI * slitA * Math.sin(theta)) / lambda;
+            let diffFactor = (beta === 0) ? 1.0 : Math.pow(Math.sin(beta) / beta, 2);
+
+            let totalIntensity = diffFactor;
+            if (currentMode === 'double') {
+                let alpha = (Math.PI * slitD * Math.sin(theta)) / lambda;
+                totalIntensity = diffFactor * Math.pow(Math.cos(alpha), 2);
+            }
+
+            // Map graph geometry points safely
+            let graphY = (hG - 15) - (totalIntensity * (hG - 25));
+            if (i === 0) ctxGraph.moveTo(i, graphY); else ctxGraph.lineTo(i, graphY);
+
+            // Directly control projection sensor colors natively without global composite math expressions
+            ctxScreen.globalAlpha = Math.max(0, Math.min(1, totalIntensity));
+            ctxScreen.fillStyle = colorHex;
+            ctxScreen.fillRect(i, 0, 1, hS);
+        }
+        ctxGraph.globalAlpha = 1.0;
+        ctxGraph.stroke();
+    }
+
+    // Assign simplified listeners
+    Object.keys(sliders).forEach(key => {
+        sliders[key].addEventListener('input', renderLoop);
+    });
+
+    document.getElementById('m-double').addEventListener('click', function() {
+        currentMode = 'double';
+        this.classList.add('active');
+        document.getElementById('m-single').classList.remove('active');
+        document.getElementById('box-sep').style.display = 'block';
+        renderLoop();
+    });
+
+    document.getElementById('m-single').addEventListener('click', function() {
+        currentMode = 'single';
+        this.classList.add('active');
+        document.getElementById('m-double').classList.remove('active');
+        document.getElementById('box-sep').style.display = 'none';
+        renderLoop();
+    });
+
+    // Run setup immediately
+    renderLoop();
+</script>
+
+</body>
+</html>
